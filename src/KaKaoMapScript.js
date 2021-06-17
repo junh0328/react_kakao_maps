@@ -11,71 +11,96 @@ export default function KakaoMapScript() {
   };
   var map = new kakao.maps.Map(container, options);
 
-  // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
   if (navigator.geolocation) {
-    // GeoLocation을 이용해서 접속 위치를 얻어옵니다
     navigator.geolocation.getCurrentPosition(function (position) {
       var lat = position.coords.latitude, // 위도
         lon = position.coords.longitude; // 경도
 
-      var locPosition = new kakao.maps.LatLng(lat, lon); // 마커가 표시될 위치를 geolocation으로 얻어온 좌표로 생성합니다
-
-      // 마커와 인포윈도우를 표시합니다
-      displayMarker(locPosition);
+      var locPosition = new kakao.maps.LatLng(lat, lon);
+      if (locPosition) {
+        console.log("locPosition:", locPosition);
+        positions[0].latlng = locPosition;
+        console.log(positions);
+      }
+      displayMarker(positions);
     });
   } else {
-    // HTML5의 GeoLocation을 사용할 수 없을때 마커 표시 위치와 인포윈도우 내용을 설정합니다
     var locPosition = new kakao.maps.LatLng(33.450701, 126.570667);
     displayMarker(locPosition);
   }
 
-  // 지도에 마커와 인포윈도우를 표시하는 함수입니다
-  function displayMarker(locPosition) {
-    // 마커를 생성합니다
-    var marker = new kakao.maps.Marker({
-      map: map,
-      position: locPosition,
-    });
+  function displayMarker(positions) {
+    console.log(positions);
+    for (var i = 0; i < positions.length; i++) {
+      var imageSize = new kakao.maps.Size(40, 60);
+      var markerImage;
 
-    fetchingOverlay();
+      // 마커 이미지가 있을 경우에만 표시
+      if (positions[i].img) {
+        markerImage = new kakao.maps.MarkerImage(positions[i].img, imageSize);
+      } else {
+        markerImage = null;
+      }
 
-    // 지도 중심좌표를 접속위치로 변경합니다
-    map.setCenter(locPosition, marker);
+      var marker = new kakao.maps.Marker({
+        map: map,
+        title: positions[i].title,
+        position: positions[i].latlng,
+        image: markerImage,
+      });
+
+      // 지도 중심좌표를 접속위치로 변경합니다
+      map.setCenter(positions[0].latlng, marker);
+    }
   }
 
-  function fetchingOverlay() {
-    // 만들고자 하는 방향 <div class="customOverlay"><img width="40px" src="${pepsi}"/></div>
-    // 만들고자 하는 방향 <div class="customOverlay"><img width="40px" src="${coca}"/></div>
+  var positions = [
+    {
+      title: "내 위치",
+      latlng: null,
+    },
+    {
+      title: "내손 의왕 메가커피",
+      latlng: new kakao.maps.LatLng(37.38992745536002, 126.97743015243483),
+      img: coca,
+    },
+    {
+      title: "평촌동 두산벤쳐다임",
+      latlng: new kakao.maps.LatLng(37.39124205567942, 126.97296865595483),
+      img: pepsi,
+    },
+    {
+      title: "내손 의왕 스타벅스",
+      latlng: new kakao.maps.LatLng(37.38903279939199, 126.97623476944985),
+      img: coca,
+    },
+  ];
 
-    const overlayBox = document.createElement("div"); // <div></div>
-    overlayBox.classList.add("customOverlay"); // <div class="customOverlay"></div>
-    const imgDiv = document.createElement("img"); // <div class="customOverlay"><img/></div>
-    imgDiv.setAttribute("width", 40);
-    imgDiv.setAttribute("src", pepsi); // <div class="customOverlay"><img width="40" src="${pepsi}"/></div>
-    imgDiv.setAttribute("alt", "가게 이미지");
-    overlayBox.append(imgDiv);
+  // function fetchingOverlay() {
+  //   const categoryImage = [pepsi, coca];
+  //   // 만들고자 하는 방향 <div class="customOverlay"><img width="40px" src="${pepsi}"/></div>
+  //   // 만들고자 하는 방향 <div class="customOverlay"><img width="40px" src="${coca}"/></div>
 
-    const overlayBox2 = document.createElement("div"); // <div></div>
-    overlayBox2.classList.add("customOverlay"); // <div class="customOverlay"></div>
-    const imgDiv2 = document.createElement("img"); // <div class="customOverlay"><img/></div>
-    imgDiv2.setAttribute("width", 40);
-    imgDiv2.setAttribute("src", coca); // <div class="customOverlay"><img width="40" src="${pepsi}"/></div>
-    imgDiv2.setAttribute("alt", "가게 이미지");
-    overlayBox2.append(imgDiv2);
+  //   const overlayBox = document.createElement("div"); // <div></div>
+  //   // overlayBox.classList.add("customOverlay"); // <div class="customOverlay"></div>
+  //   const imgDiv = document.createElement("img"); // <div class="customOverlay"><img/></div>
+  //   imgDiv.setAttribute("width", 40);
+  //   imgDiv.setAttribute("src", categoryImage[0]); // <div class="customOverlay"><img width="40" src="${pepsi}"/></div>
+  //   imgDiv.setAttribute("alt", "가게 이미지");
+  //   overlayBox.append(imgDiv);
 
-    // CustomOverlay의 content에 동일한 변수를 넣어줄 수 없음
+  //   var customOverlay = new kakao.maps.CustomOverlay({
+  //     map: map,
+  //     content: overlayBox,
+  //     position: new kakao.maps.LatLng(37.38903279939199, 126.97623476944985), // 커스텀 오버레이를 표시할 좌표
+  //   });
 
-    var customOverlay = new kakao.maps.CustomOverlay({
-      map: map,
-      content: overlayBox,
-      position: new kakao.maps.LatLng(37.38903279939199, 126.97623476944985), // 커스텀 오버레이를 표시할 좌표
-    });
-    var customOverlay2 = new kakao.maps.CustomOverlay({
-      map: map,
-      content: overlayBox2,
-      position: new kakao.maps.LatLng(37.38992745536002, 126.97743015243483), // 커스텀 오버레이를 표시할 좌표
-      yAnchor: 1,
-    });
-    return { customOverlay, customOverlay2 };
-  }
+  //   return { customOverlay };
+  // }
 }
+
+/* 
+커스텀 오버레이 대한 설정은 1개로 가져가고 마커를 커스텀 오버레이로 설정해주는 구조였음 
+각 마커에 대해 커스텀으로 오버레이 위에 덫붙이는 구조 
+따라서 마커를 다시 배열로 담은 상태에서 커스텀 오버레이로 보여주겠다라고 표시하면 될 듯
+*/
