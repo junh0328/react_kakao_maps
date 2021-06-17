@@ -1,12 +1,15 @@
-const { kakao } = window;
+import pepsi from "./public/license/pepsi.png";
+import coca from "./public/license/coca.png";
+
+var { kakao } = window;
 
 export default function KakaoMapScript() {
-  const container = document.getElementById("myMap"); // 가이드는 Map이다
-  const options = {
+  var container = document.getElementById("myMap"); // 가이드는 Map이다
+  var options = {
     center: new kakao.maps.LatLng(33.450701, 126.570667),
-    level: 3,
+    level: 2,
   };
-  const map = new kakao.maps.Map(container, options);
+  var map = new kakao.maps.Map(container, options);
 
   // HTML5의 geolocation으로 사용할 수 있는지 확인합니다
   if (navigator.geolocation) {
@@ -26,76 +29,53 @@ export default function KakaoMapScript() {
     displayMarker(locPosition);
   }
 
-  // 마커 이미지를 가져옵니다.
-  var imageSrc = "http://getdrawings.com/free-icon/coke-icon-70.png", // 마커이미지의 주소입니다
-    imageSize = new kakao.maps.Size(69, 69), // 마커이미지의 크기입니다
-    imageOption = { offset: new kakao.maps.Point(27, 69) }; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
-
-  var markerImage = new kakao.maps.MarkerImage(
-    imageSrc,
-    imageSize,
-    imageOption
-  );
   // 지도에 마커와 인포윈도우를 표시하는 함수입니다
   function displayMarker(locPosition) {
     // 마커를 생성합니다
     var marker = new kakao.maps.Marker({
       map: map,
       position: locPosition,
-      image: markerImage,
     });
 
-    var customOverlayArray = [
-      customOverlay,
-      customOverlay2,
-      customOverlay3,
-      customOverlay4,
-    ];
+    fetchingOverlay();
+
+    // 지도 중심좌표를 접속위치로 변경합니다
+    map.setCenter(locPosition, marker);
+  }
+
+  function fetchingOverlay() {
+    // 만들고자 하는 방향 <div class="customOverlay"><img width="40px" src="${pepsi}"/></div>
+    // 만들고자 하는 방향 <div class="customOverlay"><img width="40px" src="${coca}"/></div>
+
+    const overlayBox = document.createElement("div"); // <div></div>
+    overlayBox.classList.add("customOverlay"); // <div class="customOverlay"></div>
+    const imgDiv = document.createElement("img"); // <div class="customOverlay"><img/></div>
+    imgDiv.setAttribute("width", 40);
+    imgDiv.setAttribute("src", pepsi); // <div class="customOverlay"><img width="40" src="${pepsi}"/></div>
+    imgDiv.setAttribute("alt", "가게 이미지");
+    overlayBox.append(imgDiv);
+
+    const overlayBox2 = document.createElement("div"); // <div></div>
+    overlayBox2.classList.add("customOverlay"); // <div class="customOverlay"></div>
+    const imgDiv2 = document.createElement("img"); // <div class="customOverlay"><img/></div>
+    imgDiv2.setAttribute("width", 40);
+    imgDiv2.setAttribute("src", coca); // <div class="customOverlay"><img width="40" src="${pepsi}"/></div>
+    imgDiv2.setAttribute("alt", "가게 이미지");
+    overlayBox2.append(imgDiv2);
+
+    // CustomOverlay의 content에 동일한 변수를 넣어줄 수 없음
 
     var customOverlay = new kakao.maps.CustomOverlay({
       map: map,
-      content:
-        '<div style="width:20px; height:20px;border:2px solid black;border-radius:50%;padding:0 5px;background:lime;">:D</div>',
-      position: locPosition, // 커스텀 오버레이를 표시할 좌표
-      xAnchor: 5, // 컨텐츠의 x 위치
-      yAnchor: 0, // 컨텐츠의 y 위치
+      content: overlayBox,
+      position: new kakao.maps.LatLng(37.38903279939199, 126.97623476944985), // 커스텀 오버레이를 표시할 좌표
     });
-
     var customOverlay2 = new kakao.maps.CustomOverlay({
       map: map,
-      content:
-        '<div style="width:20px; height:20px;border:2px solid black;border-radius:50%;padding:0 5px;background:lime;">:D</div>',
-      position: locPosition, // 커스텀 오버레이를 표시할 좌표
-      xAnchor: -9, // 컨텐츠의 x 위치
-      yAnchor: 1, // 컨텐츠의 y 위치
+      content: overlayBox2,
+      position: new kakao.maps.LatLng(37.38992745536002, 126.97743015243483), // 커스텀 오버레이를 표시할 좌표
+      yAnchor: 1,
     });
-
-    var customOverlay3 = new kakao.maps.CustomOverlay({
-      map: map,
-      content:
-        '<div style="width:20px; height:20px;border:2px solid black;border-radius:50%;padding:0 5px;background:lime;">:D</div>',
-      position: locPosition, // 커스텀 오버레이를 표시할 좌표
-      xAnchor: 1, // 컨텐츠의 x 위치
-      yAnchor: -7, // 컨텐츠의 y 위치
-    });
-
-    var customOverlay4 = new kakao.maps.CustomOverlay({
-      map: map,
-      content:
-        '<div style="width:20px; height:20px;border:2px solid black;border-radius:50%;padding:0 5px;background:lime;">:D</div>',
-      position: locPosition, // 커스텀 오버레이를 표시할 좌표
-      xAnchor: 8, // 컨텐츠의 x 위치
-      yAnchor: 5, // 컨텐츠의 y 위치
-    });
-
-    // 지도 중심좌표를 접속위치로 변경합니다
-    // 커스텀 오버레이를 추가로 설정해줍니다.
-    map.setCenter(locPosition, marker, customOverlayArray);
+    return { customOverlay, customOverlay2 };
   }
-
-  // 지도에 확대 축소 컨트롤을 생성한다
-  var zoomControl = new kakao.maps.ZoomControl();
-
-  // 지도의 우측에 확대 축소 컨트롤을 추가한다
-  map.addControl(zoomControl, kakao.maps.ControlPosition.RIGHT);
 }
